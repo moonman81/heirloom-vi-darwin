@@ -1,0 +1,22 @@
+--- /tmp/vi-orig/ex_tty.c	2000-05-24 03:36:25
++++ ex_tty.c	2026-07-03 21:47:31
+@@ -34,9 +34,19 @@
+ #else
+ 	if (ioctl(1, TCGETA, &tty) < 0)
+ 		return;
++#ifdef __APPLE__
++	/* POSIX termios: baud rate is not in c_cflag; use cfgetispeed. */
++	{
++		speed_t _cur = cfgetospeed(&tty);
++		if ((speed_t)o_speed != _cur)
++			value(SLOWOPEN) = _cur < B1200;
++		o_speed = _cur;
++	}
++#else
+ 	if (o_speed != (tty.c_cflag & CBAUD))	/* mjm */
+ 		value(SLOWOPEN) = (tty.c_cflag & CBAUD) < B1200;
+ 	o_speed = tty.c_cflag & CBAUD;
++#endif
+ 	normf = tty;
+ 	GT = (tty.c_oflag & TABDLY) != TAB3 && !XT;
+ 	NONL = (tty.c_oflag & ONLCR) == 0;

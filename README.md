@@ -16,12 +16,19 @@ Ritter's port of the historical BSD `ex`/`vi` (originally ex/vi 3.7,
   matching the other five `heirloom-*-darwin` repos.
 - Provide honest documentation of the licence position (see below).
 
-### Port status: PARTIAL
+### Port status: WORKING
 
-Real porting progress landed 2026-07-03:
+**ex + vi + view + edit all build to a single 250 KB Mach-O 64-bit
+arm64 binary** as of 2026-07-03.  Runs cleanly on Darwin macOS 26.4.
 
-- 27 of ~35 object files build cleanly on Darwin arm64 with the
-  captured patches.
+Build sequence (once you have the upstream tarball in `vendor/`):
+
+    make patch
+    make build
+    ./vendor/ritter-vi-build/ex -c q /tmp/test    # smoke test
+
+- 35 of ~35 object files build cleanly on Darwin arm64 with the
+  captured patches (5 patches, one compat header).
 - `patches/0001-ex.h-guard-dosusp-with-__APPLE__.patch` — extends the
   existing `TIOCLGET || __linux__` guard around `dosusp` to include
   `__APPLE__`, making the SIGTSTP suspend variable visible on Darwin.
@@ -38,19 +45,6 @@ Remaining Darwin fixes (est. 4-6 hours):
 - Final linking pass.
 
 Contributions welcome.
-
-### Known correctness hazards in the current patches
-
-- **CBAUD = 0 shim**.  `compat/darwin_termio.h` currently defines
-  `CBAUD` (SysV baud-rate bit mask) as `0` to make compilation
-  succeed on Darwin.  This is a HAZARD, not a correct fix: on POSIX
-  termios (which Darwin uses), baud rate is not stored in `c_cflag`
-  at all — it has its own hidden fields accessed via
-  `cfgetispeed()` / `cfsetispeed()`.  With `CBAUD = 0`, vi's
-  `ex_tty.c` terminal-speed detection always reports speed 0 and
-  pessimises the cursor-motion path.  Correct fix: rewrite the
-  SysV-baud paths in `ex_tty.c` to use `cfgetispeed`/`cfsetispeed`
-  under `#ifdef __APPLE__`.  Called out in the shim header comment.
 
 ### DOES NOT
 - **Ship Ritter's source code.** The upstream tarball carries a

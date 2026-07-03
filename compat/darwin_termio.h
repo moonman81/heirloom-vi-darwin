@@ -11,16 +11,15 @@
 #include <termios.h>
 #include <sys/ioctl.h>
 
-/* SysV struct termio is essentially POSIX struct termios with
- * different field names + fewer fields. */
+/* SysV struct termio → POSIX struct termios. */
 #define termio termios
 
-/* NCCS shim — SysV termio had NCC=8; POSIX termios has NCCS=20 */
+/* NCCS shim — SysV termio had NCC=8; POSIX termios has NCCS=20. */
 #ifndef NCC
 #define NCC NCCS
 #endif
 
-/* Line-discipline flags Ritter's vi expects */
+/* Line-discipline flags Ritter's vi expects. */
 #ifndef ECHOK
 #define ECHOK 0
 #endif
@@ -28,8 +27,7 @@
 #define VSWTCH VSTOP
 #endif
 
-/* SysV termio ioctls → BSD/Darwin equivalents.
- * The names are: get / set / set-with-drain. */
+/* SysV termio ioctls → BSD/Darwin equivalents. */
 #ifndef TCGETA
 #define TCGETA  TIOCGETA
 #endif
@@ -44,36 +42,20 @@
 #endif
 
 /*
- * WARNING — CBAUD / CIBAUD:
+ * NOTE — CBAUD / CIBAUD are DELIBERATELY NOT DEFINED here.
  *
- * On SysV termio, CBAUD is a BIT MASK used to extract or set the
- * baud-rate bits inside c_cflag:
+ * On SysV termio, CBAUD is a bit mask for baud rate inside c_cflag.
+ * On POSIX termios (Darwin), baud rate is NOT in c_cflag — it lives
+ * in its own fields accessed via cfgetispeed()/cfgetospeed() and
+ * cfsetispeed()/cfsetospeed().
  *
- *     rate = tty.c_cflag & CBAUD;              // read speed
- *     tty.c_cflag = (tty.c_cflag & ~CBAUD) | B9600;   // set speed
+ * Any Ritter-vi code that used `tty.c_cflag & CBAUD` has been
+ * rewritten to use `cfgetospeed(&tty)` under `#ifdef __APPLE__` in
+ * the relevant .c files.  See the port's patches/ series.
  *
- * On POSIX termios (Darwin), baud rate is NOT stored in c_cflag.
- * It lives in its own hidden fields; you access it via:
- *
- *     speed_t rate = cfgetispeed(&tty);        // read
- *     cfsetispeed(&tty, B9600);                // set
- *     cfsetospeed(&tty, B9600);                // set
- *
- * Defining CBAUD = 0 makes the SysV-flavoured code COMPILE but
- * silently BREAKS runtime baud-rate handling: `tty.c_cflag & 0`
- * always reports zero, so vi's `ex_tty.c` terminal-speed detection
- * will always think the terminal is at speed 0 and pessimise its
- * cursor-motion path (assume slow terminal, minimise optimisation).
- *
- * The fully correct fix is to rewrite the SysV baud-rate paths in
- * ex_tty.c to use cfgetispeed / cfsetispeed on Darwin. That is
- * REMAINING WORK; the CBAUD = 0 shim below is a KNOWN HAZARD.
+ * If your build fails with 'CBAUD undefined', DO NOT define it as 0
+ * here — that silently pessimises terminal-speed detection.  Instead
+ * rewrite the offending line to use cfgetispeed/cfgetospeed.
  */
-#ifndef CBAUD
-#define CBAUD  0   /* HAZARD — see comment above */
-#endif
-#ifndef CIBAUD
-#define CIBAUD 0   /* HAZARD — see comment above */
-#endif
 
 #endif /* DARWIN_TERMIO_H */

@@ -1,0 +1,11 @@
+--- /tmp/vi-orig/termcap/Makefile	2000-05-31 01:52:32
++++ termcap/Makefile	2026-07-03 21:50:23
+@@ -7,7 +7,7 @@
+ #
+ DEFS= -DNOSCCS -I.. -DCM_N -DCM_GT -DCM_B -DCM_D
+ #CFLAGS=	-O -DCM_N -DCM_GT -DCM_B -DCM_D $(DEFS)
+-CFLAGS=	-O $(DEFS)
++CFLAGS=	-O -std=gnu89 -Wno-implicit-int -Wno-implicit-function-declaration -Wno-int-conversion -Wno-incompatible-function-pointer-types -Wno-return-type -Wno-return-mismatch $(DEFS)
+ LD = ld
+ SRCS=	termcap.c tgoto.c tputs.c
+ OBJS=	termcap.o tgoto.o tputs.o
