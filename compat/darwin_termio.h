@@ -28,4 +28,32 @@
 #define VSWTCH VSTOP
 #endif
 
+/* SysV termio ioctls → BSD/Darwin equivalents.
+ * The names are: get / set / set-with-drain. */
+#ifndef TCGETA
+#define TCGETA  TIOCGETA
+#endif
+#ifndef TCSETA
+#define TCSETA  TIOCSETA
+#endif
+#ifndef TCSETAW
+#define TCSETAW TIOCSETAW
+#endif
+#ifndef TCSETAF
+#define TCSETAF TIOCSETAF
+#endif
+
+
+
+/* CBAUD — SysV baud-rate mask. Not needed on POSIX termios but some
+ * code references it. Define as 0 to make comparisons harmless. */
+#ifndef CBAUD
+#define CBAUD 0
+#endif
+
+/* Other SysV termio flags that Darwin doesn't ship */
+#ifndef CIBAUD
+#define CIBAUD 0
+#endif
+
 #endif /* DARWIN_TERMIO_H */

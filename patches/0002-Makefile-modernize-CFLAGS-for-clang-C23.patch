@@ -1,0 +1,11 @@
+--- /tmp/vi-orig/Makefile	2000-05-31 01:52:44
++++ Makefile	2026-07-03 20:44:31
+@@ -39,7 +39,7 @@
+ 
+ # That's it.
+ 
+-CFLAGS=	$(OPTIONS) $(DEB)
++CFLAGS= $(OPTIONS) -std=gnu89 -Wno-implicit-int -Wno-implicit-function-declaration -Wno-int-conversion -Wno-incompatible-function-pointer-types -Wno-int-to-pointer-cast -Wno-return-mismatch -Wno-return-type $(DEB)
+ INCLUDE=/usr/include
+ OBJS=	ex.o ex_addr.o ex_cmds.o ex_cmds2.o ex_cmdsub.o \
+ 	ex_data.o ex_extern.o ex_get.o ex_io.o ex_put.o ex_re.o \

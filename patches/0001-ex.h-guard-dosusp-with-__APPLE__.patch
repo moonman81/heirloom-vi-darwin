@@ -1,0 +1,20 @@
+--- /tmp/vi-orig/ex.h	2000-05-31 01:16:19
++++ ex.h	2026-07-03 20:41:21
+@@ -70,7 +70,7 @@
+  *	probably blow the compilation if we goof up.
+  */
+ #ifdef USG3TTY
+-#include <termio.h>
++#include "darwin_termio.h"
+ #define CBREAK xxxxx
+ #else
+ #include <sgtty.h>
+@@ -214,7 +214,7 @@
+ var	char	*Command;
+ var	short	defwind;	/* -w# change default window size */
+ var	int	dirtcnt;	/* When >= MAXDIRT, should sync temporary */
+-#if defined (TIOCLGET) || defined (__linux__)
++#if defined (TIOCLGET) || defined (__linux__) || defined (__APPLE__)
+ var	bool	dosusp;		/* Do SIGTSTP in visual when ^Z typed */
+ #endif
+ var	bool	edited;		/* Current file is [Edited] */

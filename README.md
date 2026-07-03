@@ -16,6 +16,29 @@ Ritter's port of the historical BSD `ex`/`vi` (originally ex/vi 3.7,
   matching the other five `heirloom-*-darwin` repos.
 - Provide honest documentation of the licence position (see below).
 
+### Port status: PARTIAL
+
+Real porting progress landed 2026-07-03:
+
+- 27 of ~35 object files build cleanly on Darwin arm64 with the
+  captured patches.
+- `patches/0001-ex.h-guard-dosusp-with-__APPLE__.patch` — extends the
+  existing `TIOCLGET || __linux__` guard around `dosusp` to include
+  `__APPLE__`, making the SIGTSTP suspend variable visible on Darwin.
+- `patches/0002-Makefile-modernize-CFLAGS-for-clang-C23.patch` —
+  adds `-std=gnu89` and warning-suppression flags to compile against
+  modern clang (which defaults to C23).
+- `compat/darwin_termio.h` grew from a shim into a fuller SysV-to-
+  POSIX termios translation layer: `struct termio`, `NCC`, `ECHOK`,
+  `VSWTCH`, `TCGETA`, `TCSETA`, `TCSETAW`, `TCSETAF`, `CBAUD`, `CIBAUD`.
+
+Remaining Darwin fixes (est. 4-6 hours):
+- `printf.c` — replace `<varargs.h>` with `<stdarg.h>`.
+- `ex_temp.c`, `ex_v.c` — ANSI/K&R prototype mismatches.
+- Final linking pass.
+
+Contributions welcome.
+
 ### DOES NOT
 - **Ship Ritter's source code.** The upstream tarball carries a
   header that reads, verbatim,
