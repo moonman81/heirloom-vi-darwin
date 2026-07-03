@@ -39,6 +39,19 @@ Remaining Darwin fixes (est. 4-6 hours):
 
 Contributions welcome.
 
+### Known correctness hazards in the current patches
+
+- **CBAUD = 0 shim**.  `compat/darwin_termio.h` currently defines
+  `CBAUD` (SysV baud-rate bit mask) as `0` to make compilation
+  succeed on Darwin.  This is a HAZARD, not a correct fix: on POSIX
+  termios (which Darwin uses), baud rate is not stored in `c_cflag`
+  at all — it has its own hidden fields accessed via
+  `cfgetispeed()` / `cfsetispeed()`.  With `CBAUD = 0`, vi's
+  `ex_tty.c` terminal-speed detection always reports speed 0 and
+  pessimises the cursor-motion path.  Correct fix: rewrite the
+  SysV-baud paths in `ex_tty.c` to use `cfgetispeed`/`cfsetispeed`
+  under `#ifdef __APPLE__`.  Called out in the shim header comment.
+
 ### DOES NOT
 - **Ship Ritter's source code.** The upstream tarball carries a
   header that reads, verbatim,

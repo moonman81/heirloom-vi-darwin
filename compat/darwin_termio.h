@@ -43,17 +43,37 @@
 #define TCSETAF TIOCSETAF
 #endif
 
-
-
-/* CBAUD — SysV baud-rate mask. Not needed on POSIX termios but some
- * code references it. Define as 0 to make comparisons harmless. */
+/*
+ * WARNING — CBAUD / CIBAUD:
+ *
+ * On SysV termio, CBAUD is a BIT MASK used to extract or set the
+ * baud-rate bits inside c_cflag:
+ *
+ *     rate = tty.c_cflag & CBAUD;              // read speed
+ *     tty.c_cflag = (tty.c_cflag & ~CBAUD) | B9600;   // set speed
+ *
+ * On POSIX termios (Darwin), baud rate is NOT stored in c_cflag.
+ * It lives in its own hidden fields; you access it via:
+ *
+ *     speed_t rate = cfgetispeed(&tty);        // read
+ *     cfsetispeed(&tty, B9600);                // set
+ *     cfsetospeed(&tty, B9600);                // set
+ *
+ * Defining CBAUD = 0 makes the SysV-flavoured code COMPILE but
+ * silently BREAKS runtime baud-rate handling: `tty.c_cflag & 0`
+ * always reports zero, so vi's `ex_tty.c` terminal-speed detection
+ * will always think the terminal is at speed 0 and pessimise its
+ * cursor-motion path (assume slow terminal, minimise optimisation).
+ *
+ * The fully correct fix is to rewrite the SysV baud-rate paths in
+ * ex_tty.c to use cfgetispeed / cfsetispeed on Darwin. That is
+ * REMAINING WORK; the CBAUD = 0 shim below is a KNOWN HAZARD.
+ */
 #ifndef CBAUD
-#define CBAUD 0
+#define CBAUD  0   /* HAZARD — see comment above */
 #endif
-
-/* Other SysV termio flags that Darwin doesn't ship */
 #ifndef CIBAUD
-#define CIBAUD 0
+#define CIBAUD 0   /* HAZARD — see comment above */
 #endif
 
 #endif /* DARWIN_TERMIO_H */
