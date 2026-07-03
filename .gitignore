@@ -1,0 +1,4 @@
+# Users drop the upstream tarball here; don't commit it
+vendor/*.tar.gz
+build/
+.install-manifest-*.txt
